@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__finance" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__finance" name="Finance - CA code" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="fin_ca_entry" name="Enter CA code, KYC and amount" operaton:formKey="embedded:deployment:forms/fin_ca_entry.html" operaton:assignee="${initiator}"></bpmn:userTask>
+<bpmn:userTask id="fin_supervisor" name="Supervisor finance review" operaton:formKey="embedded:deployment:forms/fin_supervisor.html" operaton:candidateGroups="bdSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="fin_supervisor_gw" />
+<bpmn:userTask id="fin_admin" name="Admin finance approval" operaton:formKey="embedded:deployment:forms/fin_admin.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="fin_admin_gw" />
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="fin_ca_entry" />
+<bpmn:sequenceFlow id="f2" sourceRef="fin_ca_entry" targetRef="fin_supervisor" />
+<bpmn:sequenceFlow id="f3" sourceRef="fin_supervisor" targetRef="fin_supervisor_gw" />
+<bpmn:sequenceFlow id="f4" sourceRef="fin_supervisor_gw" targetRef="fin_admin" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fin_supervisor_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f5" sourceRef="fin_supervisor_gw" targetRef="fin_ca_entry" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fin_supervisor_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="fin_admin" targetRef="fin_admin_gw" />
+<bpmn:sequenceFlow id="f7" sourceRef="fin_admin_gw" targetRef="done" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fin_admin_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f8" sourceRef="fin_admin_gw" targetRef="fin_ca_entry" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fin_admin_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__finance"><bpmndi:BPMNPlane id="plane_matrix_site__finance" bpmnElement="matrix_site__finance">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1092" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fin_ca_entry_di" bpmnElement="fin_ca_entry"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fin_supervisor_di" bpmnElement="fin_supervisor"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fin_supervisor_gw_di" bpmnElement="fin_supervisor_gw"><dc:Bounds x="590" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fin_admin_di" bpmnElement="fin_admin"><dc:Bounds x="725" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fin_admin_gw_di" bpmnElement="fin_admin_gw"><dc:Bounds x="920" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="590" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="640" y="120" /><di:waypoint x="725" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="615" y="95" /><di:waypoint x="615" y="62" /><di:waypoint x="285" y="62" /><di:waypoint x="285" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="835" y="120" /><di:waypoint x="920" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="970" y="120" /><di:waypoint x="1092" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="945" y="95" /><di:waypoint x="945" y="54" /><di:waypoint x="285" y="54" /><di:waypoint x="285" y="80" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

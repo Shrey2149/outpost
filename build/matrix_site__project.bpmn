@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__project" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__project" name="Project execution" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="prj_allocate" name="Propose project initialization" operaton:formKey="embedded:deployment:forms/prj_allocate.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:userTask id="prj_accept" name="Accept project allocation" operaton:formKey="embedded:deployment:forms/prj_accept.html" operaton:assignee="${projectExec}"></bpmn:userTask>
+<bpmn:exclusiveGateway id="prj_accept_gw" />
+<bpmn:userTask id="prj_expected" name="Submit expected completion" operaton:formKey="embedded:deployment:forms/prj_expected.html" operaton:assignee="${projectExec}"></bpmn:userTask>
+<bpmn:userTask id="prj_expected_review" name="Approve expected completion" operaton:formKey="embedded:deployment:forms/prj_expected_review.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="prj_expected_review_gw" />
+<bpmn:userTask id="prj_mid_visit" name="Set mid-project visit" operaton:formKey="embedded:deployment:forms/prj_mid_visit.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:userTask id="prj_inspection" name="Submit inspection and quality audit" operaton:formKey="embedded:deployment:forms/prj_inspection.html" operaton:assignee="${projectExec}"></bpmn:userTask>
+<bpmn:userTask id="prj_qa_review" name="Review quality audit" operaton:formKey="embedded:deployment:forms/prj_qa_review.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="prj_qa_review_gw" />
+<bpmn:userTask id="prj_qa_signoff" name="Quality audit sign-off" operaton:formKey="embedded:deployment:forms/prj_qa_signoff.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="prj_qa_signoff_gw" />
+<bpmn:userTask id="prj_complete" name="Mark final completion" operaton:formKey="embedded:deployment:forms/prj_complete.html" operaton:assignee="${projectExec}"></bpmn:userTask>
+<bpmn:userTask id="prj_push_nso" name="Push to NSO handover" operaton:formKey="embedded:deployment:forms/prj_push_nso.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="prj_allocate" />
+<bpmn:sequenceFlow id="f2" sourceRef="prj_allocate" targetRef="prj_accept" />
+<bpmn:sequenceFlow id="f3" sourceRef="prj_accept" targetRef="prj_accept_gw" />
+<bpmn:sequenceFlow id="f4" sourceRef="prj_accept_gw" targetRef="prj_expected" name="Accept"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_accept_outcome == 'accept'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f5" sourceRef="prj_accept_gw" targetRef="prj_allocate" name="Decline"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_accept_outcome == 'decline'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="prj_expected" targetRef="prj_expected_review" />
+<bpmn:sequenceFlow id="f7" sourceRef="prj_expected_review" targetRef="prj_expected_review_gw" />
+<bpmn:sequenceFlow id="f8" sourceRef="prj_expected_review_gw" targetRef="prj_mid_visit" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_expected_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f9" sourceRef="prj_expected_review_gw" targetRef="prj_expected" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_expected_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f10" sourceRef="prj_mid_visit" targetRef="prj_inspection" />
+<bpmn:sequenceFlow id="f11" sourceRef="prj_inspection" targetRef="prj_qa_review" />
+<bpmn:sequenceFlow id="f12" sourceRef="prj_qa_review" targetRef="prj_qa_review_gw" />
+<bpmn:sequenceFlow id="f13" sourceRef="prj_qa_review_gw" targetRef="prj_qa_signoff" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_qa_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f14" sourceRef="prj_qa_review_gw" targetRef="prj_inspection" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_qa_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f15" sourceRef="prj_qa_signoff" targetRef="prj_qa_signoff_gw" />
+<bpmn:sequenceFlow id="f16" sourceRef="prj_qa_signoff_gw" targetRef="prj_complete" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_qa_signoff_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f17" sourceRef="prj_qa_signoff_gw" targetRef="prj_inspection" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${prj_qa_signoff_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f18" sourceRef="prj_complete" targetRef="prj_push_nso" />
+<bpmn:sequenceFlow id="f19" sourceRef="prj_push_nso" targetRef="done" />
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__project"><bpmndi:BPMNPlane id="plane_matrix_site__project" bpmnElement="matrix_site__project">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="2577" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_allocate_di" bpmnElement="prj_allocate"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_accept_di" bpmnElement="prj_accept"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_accept_gw_di" bpmnElement="prj_accept_gw"><dc:Bounds x="590" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_expected_di" bpmnElement="prj_expected"><dc:Bounds x="725" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_expected_review_di" bpmnElement="prj_expected_review"><dc:Bounds x="890" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_expected_review_gw_di" bpmnElement="prj_expected_review_gw"><dc:Bounds x="1085" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_mid_visit_di" bpmnElement="prj_mid_visit"><dc:Bounds x="1220" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_inspection_di" bpmnElement="prj_inspection"><dc:Bounds x="1385" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_qa_review_di" bpmnElement="prj_qa_review"><dc:Bounds x="1550" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_qa_review_gw_di" bpmnElement="prj_qa_review_gw"><dc:Bounds x="1745" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_qa_signoff_di" bpmnElement="prj_qa_signoff"><dc:Bounds x="1880" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_qa_signoff_gw_di" bpmnElement="prj_qa_signoff_gw"><dc:Bounds x="2075" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_complete_di" bpmnElement="prj_complete"><dc:Bounds x="2210" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="prj_push_nso_di" bpmnElement="prj_push_nso"><dc:Bounds x="2375" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="590" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="640" y="120" /><di:waypoint x="725" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="615" y="95" /><di:waypoint x="615" y="62" /><di:waypoint x="285" y="62" /><di:waypoint x="285" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="835" y="120" /><di:waypoint x="890" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="1000" y="120" /><di:waypoint x="1085" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="1135" y="120" /><di:waypoint x="1220" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1110" y="95" /><di:waypoint x="1110" y="54" /><di:waypoint x="780" y="54" /><di:waypoint x="780" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f10_di" bpmnElement="f10"><di:waypoint x="1330" y="120" /><di:waypoint x="1385" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f11_di" bpmnElement="f11"><di:waypoint x="1495" y="120" /><di:waypoint x="1550" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f12_di" bpmnElement="f12"><di:waypoint x="1660" y="120" /><di:waypoint x="1745" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f13_di" bpmnElement="f13"><di:waypoint x="1795" y="120" /><di:waypoint x="1880" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f14_di" bpmnElement="f14"><di:waypoint x="1770" y="95" /><di:waypoint x="1770" y="46" /><di:waypoint x="1440" y="46" /><di:waypoint x="1440" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f15_di" bpmnElement="f15"><di:waypoint x="1990" y="120" /><di:waypoint x="2075" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f16_di" bpmnElement="f16"><di:waypoint x="2125" y="120" /><di:waypoint x="2210" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f17_di" bpmnElement="f17"><di:waypoint x="2100" y="95" /><di:waypoint x="2100" y="38" /><di:waypoint x="1440" y="38" /><di:waypoint x="1440" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f18_di" bpmnElement="f18"><di:waypoint x="2320" y="120" /><di:waypoint x="2375" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f19_di" bpmnElement="f19"><di:waypoint x="2485" y="120" /><di:waypoint x="2577" y="120" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

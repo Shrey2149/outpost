@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__nso" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__nso" name="NSO - Opening readiness" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="nso_comms" name="Float launch communications" operaton:formKey="embedded:deployment:forms/nso_comms.html" operaton:candidateGroups="nsoExecutive"></bpmn:userTask>
+<bpmn:userTask id="nso_readiness" name="Complete readiness checks" operaton:formKey="embedded:deployment:forms/nso_readiness.html" operaton:candidateGroups="nsoExecutive"></bpmn:userTask>
+<bpmn:parallelGateway id="split2" />
+<bpmn:parallelGateway id="join2" />
+<bpmn:userTask id="nso_signoff" name="NSO sign-off" operaton:formKey="embedded:deployment:forms/nso_signoff.html" operaton:candidateGroups="nsoSupervisor"></bpmn:userTask>
+<bpmn:userTask id="nso_project_signoff" name="Project sign-off for NSO" operaton:formKey="embedded:deployment:forms/nso_project_signoff.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:userTask id="nso_launch_ready" name="Final approval: launch ready" operaton:formKey="embedded:deployment:forms/nso_launch_ready.html" operaton:candidateGroups="nsoSupervisor"></bpmn:userTask>
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="nso_comms" />
+<bpmn:sequenceFlow id="f2" sourceRef="nso_comms" targetRef="nso_readiness" />
+<bpmn:sequenceFlow id="f3" sourceRef="nso_readiness" targetRef="split2" />
+<bpmn:sequenceFlow id="f4" sourceRef="split2" targetRef="nso_signoff" />
+<bpmn:sequenceFlow id="f5" sourceRef="nso_signoff" targetRef="join2" />
+<bpmn:sequenceFlow id="f6" sourceRef="split2" targetRef="nso_project_signoff" />
+<bpmn:sequenceFlow id="f7" sourceRef="nso_project_signoff" targetRef="join2" />
+<bpmn:sequenceFlow id="f8" sourceRef="join2" targetRef="nso_launch_ready" />
+<bpmn:sequenceFlow id="f9" sourceRef="nso_launch_ready" targetRef="done" />
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__nso"><bpmndi:BPMNPlane id="plane_matrix_site__nso" bpmnElement="matrix_site__nso">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1257" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="nso_comms_di" bpmnElement="nso_comms"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="nso_readiness_di" bpmnElement="nso_readiness"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="split2_di" bpmnElement="split2"><dc:Bounds x="590" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="join2_di" bpmnElement="join2"><dc:Bounds x="920" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="nso_signoff_di" bpmnElement="nso_signoff"><dc:Bounds x="725" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="nso_project_signoff_di" bpmnElement="nso_project_signoff"><dc:Bounds x="725" y="220" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="nso_launch_ready_di" bpmnElement="nso_launch_ready"><dc:Bounds x="1055" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="590" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="640" y="120" /><di:waypoint x="725" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="835" y="120" /><di:waypoint x="920" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="260" /><di:waypoint x="725" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="835" y="260" /><di:waypoint x="945" y="260" /><di:waypoint x="945" y="145" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="970" y="120" /><di:waypoint x="1055" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1165" y="120" /><di:waypoint x="1257" y="120" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

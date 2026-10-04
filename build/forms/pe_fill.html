@@ -1,0 +1,42 @@
+<form role="form">
+<div class="well well-sm" id="mx-show-pe_fill"><strong>Site data</strong><table class="table table-condensed" style="margin:6px 0 0"><tbody></tbody></table></div>
+<div class="form-group"><label class="control-label" for="budProfessionalFees">Professional Fees</label><input type="number" step="any" class="form-control" cam-variable-name="budProfessionalFees" name="budProfessionalFees" id="budProfessionalFees" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budHvac">HVAC</label><input type="number" step="any" class="form-control" cam-variable-name="budHvac" name="budHvac" id="budHvac" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budFurniture">Furniture, Light and Planters</label><input type="number" step="any" class="form-control" cam-variable-name="budFurniture" name="budFurniture" id="budFurniture" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budCivil">Civil and Interiors</label><input type="number" step="any" class="form-control" cam-variable-name="budCivil" name="budCivil" id="budCivil" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budKitchen">Kitchen Equipment</label><input type="number" step="any" class="form-control" cam-variable-name="budKitchen" name="budKitchen" id="budKitchen" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budBranding">Branding</label><input type="number" step="any" class="form-control" cam-variable-name="budBranding" name="budBranding" id="budBranding" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budCrockery">Crockery and Small Equipments</label><input type="number" step="any" class="form-control" cam-variable-name="budCrockery" name="budCrockery" id="budCrockery" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budUtilities">Utilities</label><input type="number" step="any" class="form-control" cam-variable-name="budUtilities" name="budUtilities" id="budUtilities" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budLicencing">Licencing</label><input type="number" step="any" class="form-control" cam-variable-name="budLicencing" name="budLicencing" id="budLicencing" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budBdCost">BD Cost</label><input type="number" step="any" class="form-control" cam-variable-name="budBdCost" name="budBdCost" id="budBdCost" cam-variable-type="Double" required></div>
+<div class="form-group"><label class="control-label" for="budMisc">Misc</label><input type="number" step="any" class="form-control" cam-variable-name="budMisc" name="budMisc" id="budMisc" cam-variable-type="Double" required></div>
+<script cam-script type="text/form-script">
+(function () {
+  var SHOW = [["initiator", "Created by"], ["siteName", "Site name"], ["city", "City"], ["address", "Address"], ["boqFile", "BOQ"], ["boqEstimate", "Estimate (INR)"]], TID = 'pe_fill';
+  var api = window.location.pathname.split('/app/')[0] + '/api/engine/engine/default';
+  camForm.on('form-loaded', function () { SHOW.forEach(function (s) { camForm.variableManager.fetchVariable(s[0]); }); });
+  camForm.on('variables-fetched', function () {
+    var body = document.querySelector('#mx-show-' + TID + ' tbody');
+    if (!body) { return; }
+    body.innerHTML = '';
+    SHOW.forEach(function (s) {
+      var v = camForm.variableManager.variable(s[0]) || {}, td = document.createElement('td'), tr = document.createElement('tr');
+      if (v.type === 'File' || (v.valueInfo && v.valueInfo.filename)) {
+        var link = document.createElement('a');
+        link.href = api + '/task/' + camForm.taskId + '/variables/' + s[0] + '/data';
+        link.textContent = (v.valueInfo && v.valueInfo.filename) || 'download';
+        link.target = '_blank';
+        td.appendChild(link);
+      } else {
+        td.textContent = v.value === undefined || v.value === null || v.value === '' ? '-' : (v.value === true ? 'Yes' : v.value === false ? 'No' : String(v.value));
+      }
+      var th = document.createElement('th');
+      th.textContent = s[1];
+      th.style.width = '40%';
+      tr.appendChild(th); tr.appendChild(td); body.appendChild(tr);
+    });
+  });
+})();
+</script>
+</form>

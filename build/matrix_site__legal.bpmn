@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__legal" targetNamespace="https://matrix-bd/workflow">
+<bpmn:error id="Error_CLOSED" name="CLOSED" errorCode="CLOSED" />
+<bpmn:process id="matrix_site__legal" name="Legal - Due diligence" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="legal_dd_checklist" name="Fill DD checklist" operaton:formKey="embedded:deployment:forms/legal_dd_checklist.html" operaton:candidateGroups="legalExecutive"></bpmn:userTask>
+<bpmn:userTask id="legal_dd_verdict" name="Finalise DD verdict" operaton:formKey="embedded:deployment:forms/legal_dd_verdict.html" operaton:candidateGroups="legalSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="legal_dd_verdict_gw" />
+<bpmn:userTask id="legal_change_request" name="Raise change request?" operaton:formKey="embedded:deployment:forms/legal_change_request.html" operaton:candidateGroups="bdSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="legal_change_request_gw" />
+<bpmn:endEvent id="legal_change_request_accept_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:userTask id="legal_review_cr" name="Review change request" operaton:formKey="embedded:deployment:forms/legal_review_cr.html" operaton:candidateGroups="legalSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="legal_review_cr_gw" />
+<bpmn:userTask id="legal_agreement" name="Save agreement" operaton:formKey="embedded:deployment:forms/legal_agreement.html" operaton:candidateGroups="legalSupervisor"></bpmn:userTask>
+<bpmn:userTask id="legal_licensing" name="Update licensing (5 licences)" operaton:formKey="embedded:deployment:forms/legal_licensing.html" operaton:candidateGroups="legalSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="legal_licensing_gw" />
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="legal_dd_checklist" />
+<bpmn:sequenceFlow id="f2" sourceRef="legal_dd_checklist" targetRef="legal_dd_verdict" />
+<bpmn:sequenceFlow id="f3" sourceRef="legal_dd_verdict" targetRef="legal_dd_verdict_gw" />
+<bpmn:sequenceFlow id="f4" sourceRef="legal_dd_verdict_gw" targetRef="legal_agreement" name="Positive"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${legal_dd_verdict_outcome == 'positive'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f5" sourceRef="legal_dd_verdict_gw" targetRef="legal_change_request" name="Negative"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${legal_dd_verdict_outcome == 'negative'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="legal_change_request" targetRef="legal_change_request_gw" />
+<bpmn:sequenceFlow id="f7" sourceRef="legal_change_request_gw" targetRef="legal_review_cr" name="Raise change request"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${legal_change_request_outcome == 'raise'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f8" sourceRef="legal_change_request_gw" targetRef="legal_change_request_accept_end" name="Accept rejection"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${legal_change_request_outcome == 'accept'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f9" sourceRef="legal_review_cr" targetRef="legal_review_cr_gw" />
+<bpmn:sequenceFlow id="f10" sourceRef="legal_review_cr_gw" targetRef="legal_dd_verdict" name="Approve, re-finalise verdict"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${legal_review_cr_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f11" sourceRef="legal_review_cr_gw" targetRef="legal_change_request" name="Reject"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${legal_review_cr_outcome == 'reject'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f12" sourceRef="legal_agreement" targetRef="legal_licensing" />
+<bpmn:sequenceFlow id="f13" sourceRef="legal_licensing" targetRef="legal_licensing_gw" />
+<bpmn:sequenceFlow id="f14" sourceRef="legal_licensing_gw" targetRef="legal_licensing" name="Some pending"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!(licFssai &amp;&amp; licHealthTrade &amp;&amp; licShopsEstab &amp;&amp; licFireNoc &amp;&amp; licStorage)}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f15" sourceRef="legal_licensing_gw" targetRef="done" name="Otherwise"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!(!(licFssai &amp;&amp; licHealthTrade &amp;&amp; licShopsEstab &amp;&amp; licFireNoc &amp;&amp; licStorage))}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__legal"><bpmndi:BPMNPlane id="plane_matrix_site__legal" bpmnElement="matrix_site__legal">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1257" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_dd_checklist_di" bpmnElement="legal_dd_checklist"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_dd_verdict_di" bpmnElement="legal_dd_verdict"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_dd_verdict_gw_di" bpmnElement="legal_dd_verdict_gw"><dc:Bounds x="590" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_change_request_di" bpmnElement="legal_change_request"><dc:Bounds x="725" y="220" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_change_request_gw_di" bpmnElement="legal_change_request_gw"><dc:Bounds x="920" y="235" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_change_request_accept_end_di" bpmnElement="legal_change_request_accept_end"><dc:Bounds x="1092" y="382" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_review_cr_di" bpmnElement="legal_review_cr"><dc:Bounds x="1055" y="220" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_review_cr_gw_di" bpmnElement="legal_review_cr_gw"><dc:Bounds x="1250" y="235" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_agreement_di" bpmnElement="legal_agreement"><dc:Bounds x="725" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_licensing_di" bpmnElement="legal_licensing"><dc:Bounds x="890" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="legal_licensing_gw_di" bpmnElement="legal_licensing_gw"><dc:Bounds x="1085" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="590" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="640" y="120" /><di:waypoint x="725" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="260" /><di:waypoint x="725" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="835" y="260" /><di:waypoint x="920" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="970" y="260" /><di:waypoint x="1055" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="945" y="285" /><di:waypoint x="945" y="400" /><di:waypoint x="1092" y="400" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1165" y="260" /><di:waypoint x="1250" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f10_di" bpmnElement="f10"><di:waypoint x="1275" y="235" /><di:waypoint x="1275" y="62" /><di:waypoint x="450" y="62" /><di:waypoint x="450" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f11_di" bpmnElement="f11"><di:waypoint x="1275" y="235" /><di:waypoint x="1275" y="194" /><di:waypoint x="780" y="194" /><di:waypoint x="780" y="220" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f12_di" bpmnElement="f12"><di:waypoint x="835" y="120" /><di:waypoint x="890" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f13_di" bpmnElement="f13"><di:waypoint x="1000" y="120" /><di:waypoint x="1085" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f14_di" bpmnElement="f14"><di:waypoint x="1110" y="95" /><di:waypoint x="1110" y="46" /><di:waypoint x="945" y="46" /><di:waypoint x="945" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f15_di" bpmnElement="f15"><di:waypoint x="1135" y="120" /><di:waypoint x="1257" y="120" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

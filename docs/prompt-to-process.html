@@ -1,0 +1,424 @@
+<title>Prompt to Process</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column with a five-stage pipeline strip, then a prompt-to-config mapping in two columns.
+   Owner colours are semantic: every block is tinted by who produces it. */
+:root {
+  --bg: #f1f3f4;
+  --surface: #ffffff;
+  --ink: #16202a;
+  --muted: #5b6672;
+  --rule: #d5dadf;
+  --code-bg: #e9edf0;
+  --you: #3b4651;      --you-soft: #e3e7eb;
+  --llm: #6d45c9;      --llm-soft: #ece6fa;
+  --ours: #1f5bd1;     --ours-soft: #e2eafb;
+  --engine: #c45a1c;   --engine-soft: #fbe9de;
+  --ok: #217a4b;       --bad: #b4322a;
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161b; --surface: #182029; --ink: #e6ebf0; --muted: #9aa6b2; --rule: #2b3642; --code-bg: #0d1217;
+    --you: #b9c3cd; --you-soft: #232d37;
+    --llm: #b49af0; --llm-soft: #2a2140;
+    --ours: #7fa6f5; --ours-soft: #1b2843;
+    --engine: #f0955c; --engine-soft: #3a2518;
+    --ok: #5fc48d; --bad: #f08078;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161b; --surface: #182029; --ink: #e6ebf0; --muted: #9aa6b2; --rule: #2b3642; --code-bg: #0d1217;
+  --you: #b9c3cd; --you-soft: #232d37;
+  --llm: #b49af0; --llm-soft: #2a2140;
+  --ours: #7fa6f5; --ours-soft: #1b2843;
+  --engine: #f0955c; --engine-soft: #3a2518;
+  --ok: #5fc48d; --bad: #f08078;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 72px; display: grid; gap: 64px; }
+h1, h2, h3 { font-family: var(--display); font-stretch: 85%; line-height: 1.08; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.2rem, 5.2vw, 3.8rem); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 750; }
+h3 { font-size: 1.15rem; font-weight: 700; font-stretch: 90%; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+code, pre { font-family: var(--mono); font-size: 13px; }
+:not(pre) > code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+section { display: grid; gap: 22px; }
+.lede { font-size: 1.2rem; color: var(--muted); max-width: 60ch; }
+.hero { display: grid; gap: 18px; }
+.hero h1 span { display: block; }
+.hero .who { color: var(--llm); }
+.hero .run { color: var(--engine); }
+
+/* owner chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.c-you { color: var(--you); background: var(--you-soft); }
+.c-llm { color: var(--llm); background: var(--llm-soft); }
+.c-ours { color: var(--ours); background: var(--ours-soft); }
+.c-engine { color: var(--engine); background: var(--engine-soft); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* pipeline */
+.pipe { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.stage { padding: 18px 16px 20px; display: grid; gap: 10px; align-content: start; border-right: 1px solid var(--rule); position: relative; min-width: 0; }
+.stage:last-child { border-right: 0; }
+.stage::after { content: "→"; position: absolute; right: -9px; top: 18px; width: 18px; height: 18px; display: grid; place-items: center; background: var(--surface); color: var(--muted); font-size: 13px; z-index: 1; }
+.stage:last-child::after { display: none; }
+.stage .n { font-family: var(--display); font-weight: 800; font-size: 2rem; line-height: 1; }
+.stage.s-you .n { color: var(--you); } .stage.s-llm .n { color: var(--llm); } .stage.s-ours .n { color: var(--ours); } .stage.s-engine .n { color: var(--engine); }
+.stage dl { margin: 0; display: grid; gap: 6px; font-size: 14.5px; }
+.stage dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.stage dd { margin: 0; }
+@media (max-width: 900px) {
+  .pipe { grid-template-columns: 1fr; }
+  .stage { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .stage:last-child { border-bottom: 0; }
+  .stage::after { content: "↓"; right: auto; left: 18px; top: auto; bottom: -9px; }
+}
+
+/* prompt mapping */
+.map { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
+@media (max-width: 860px) { .map { grid-template-columns: 1fr; } }
+.prompt { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 22px 22px 24px; font-size: 1.05rem; line-height: 1.75; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (max-width: 860px) { .prompt { position: static; } }
+.prompt .eyebrow { display: block; margin-bottom: 10px; }
+.ph { background: var(--you-soft); border-bottom: 2px solid var(--you); padding: 1px 2px; border-radius: 2px; cursor: pointer; }
+.ph sup { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--you); margin-left: 2px; }
+.ph:hover, .ph.on { background: var(--llm-soft); border-bottom-color: var(--llm); }
+.ph:focus-visible { outline: 2px solid var(--llm); outline-offset: 2px; }
+.results { display: grid; gap: 12px; }
+.res { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 12px; transition: border-color .15s, box-shadow .15s; }
+.res.on { border-color: var(--llm); box-shadow: 0 0 0 3px var(--llm-soft); }
+.res .k { grid-row: span 3; font-family: var(--mono); font-weight: 600; color: var(--muted); font-size: 13px; padding-top: 2px; }
+.res .what { font-weight: 600; }
+.res pre { margin: 6px 0 0; background: var(--code-bg); padding: 10px 12px; border-radius: 6px; overflow-x: auto; line-height: 1.5; white-space: pre; }
+.res .then { font-size: 14.5px; color: var(--muted); }
+.res .then b { color: var(--ours); font-weight: 600; }
+.res.warn .what { color: var(--bad); }
+
+/* tool log */
+.log { background: var(--code-bg); border-radius: 10px; padding: 18px 20px; overflow-x: auto; }
+.log pre { margin: 0; line-height: 1.75; white-space: pre; }
+.log .c { color: var(--muted); }
+.log .bad { color: var(--bad); }
+.log .ok { color: var(--ok); }
+.log .ask { color: var(--you); font-style: italic; }
+.log .fn { color: var(--llm); font-weight: 600; }
+
+/* producers */
+.cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 980px) { .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .cols { grid-template-columns: 1fr; } }
+.col { background: var(--surface); border: 1px solid var(--rule); border-top: 4px solid var(--c); border-radius: 8px; padding: 16px 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.col.k-you { --c: var(--you); } .col.k-llm { --c: var(--llm); } .col.k-ours { --c: var(--ours); } .col.k-engine { --c: var(--engine); }
+.col h3 { color: var(--c); }
+.col .sub { font-size: 14px; color: var(--muted); }
+.col ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 15px; }
+.col .file { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+/* runtime */
+.runtime { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-left: 2px solid var(--engine); }
+@media (max-width: 860px) { .runtime { grid-template-columns: 1fr; } }
+.tick { padding: 4px 18px 6px; display: grid; gap: 6px; min-width: 0; }
+.tick .t { font-family: var(--mono); font-size: 11px; color: var(--engine); letter-spacing: .06em; text-transform: uppercase; }
+.tick p { font-size: 15px; }
+
+/* guardrails */
+.rails { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rail { padding: 14px 16px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); display: grid; gap: 6px; }
+.rail p { font-size: 15px; color: var(--muted); }
+
+/* build status */
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.st { font-family: var(--mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.st.done { color: var(--ok); } .st.todo { color: var(--engine); }
+footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 18px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Matrix on Operaton · configuration, not code</span>
+    <h1><span>You describe the flow.</span><span class="who">The agent picks and arranges.</span><span class="run">Operaton runs it.</span></h1>
+    <p class="lede">The LLM never writes BPMN, forms or code. It chooses from your predefined packages and fills in a configuration. Our platform validates that configuration, compiles it, and hands Operaton something it can execute.</p>
+    <div class="legend" aria-label="Who produces what">
+      <span class="chip c-you">You</span>
+      <span class="chip c-llm">LLM agent</span>
+      <span class="chip c-ours">Our platform</span>
+      <span class="chip c-engine">Operaton</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="pipe-h">
+    <h2 id="pipe-h">The five hand-offs</h2>
+    <div class="pipe">
+      <div class="stage s-you">
+        <span class="n">1</span><span class="chip c-you">You</span>
+        <h3>Describe</h3>
+        <dl><dt>Gives</dt><dd>Who does which task, in what order, who approves, what happens on reject.</dd>
+            <dt>Produces</dt><dd>A plain-language brief.</dd></dl>
+      </div>
+      <div class="stage s-llm">
+        <span class="n">2</span><span class="chip c-llm">LLM agent</span>
+        <h3>Select and arrange</h3>
+        <dl><dt>Reads</dt><dd>Your brief, plus the package catalogue through MCP tools.</dd>
+            <dt>Produces</dt><dd>A sequence of tool calls: add module, set order, add task, add field, add user.</dd></dl>
+      </div>
+      <div class="stage s-ours">
+        <span class="n">3</span><span class="chip c-ours">Our platform</span>
+        <h3>Validate</h3>
+        <dl><dt>Checks</dt><dd>Every role has a person, every target exists, no cycles, field types are known.</dd>
+            <dt>Produces</dt><dd>A valid <code>workspace.json</code>, or errors the agent must fix.</dd></dl>
+      </div>
+      <div class="stage s-ours">
+        <span class="n">4</span><span class="chip c-ours">Our platform</span>
+        <h3>Compile</h3>
+        <dl><dt>Deterministic</dt><dd>Same config, same output, every time.</dd>
+            <dt>Produces</dt><dd>BPMN per module, a task form per step, users, roles, permissions, inbox views.</dd></dl>
+      </div>
+      <div class="stage s-engine">
+        <span class="n">5</span><span class="chip c-engine">Operaton</span>
+        <h3>Deploy and run</h3>
+        <dl><dt>Stores</dt><dd>Release vN in Postgres. Running sites stay on their version.</dd>
+            <dt>Produces</dt><dd>Live cases, task inboxes, routing, permission checks, full history.</dd></dl>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ex-h">
+    <h2 id="ex-h">One brief, traced</h2>
+    <p>Select a highlighted phrase to see what it became. Every result is a field in the configuration, built from a predefined package wherever one exists.</p>
+    <div class="map">
+      <div class="prompt" role="group" aria-label="Example brief">
+        <span class="eyebrow">Your brief</span>
+        <span class="ph" tabindex="0" data-k="1">A BD executive proposes a site with its name, city and address.<sup>1</sup></span>
+        <span class="ph" tabindex="0" data-k="2">A BD supervisor shortlists or rejects it, unless the supervisor created it.<sup>2</sup></span>
+        <span class="ph" tabindex="0" data-k="3">The executive adds area, rent and photos; the supervisor approves or sends it back.<sup>3</sup></span>
+        <span class="ph" tabindex="0" data-k="4">After the LOI is uploaded, Legal and Finance work in parallel.<sup>4</sup></span>
+        <span class="ph" tabindex="0" data-k="5">Legal runs its usual due diligence, and a negative verdict can be challenged.<sup>5</sup></span>
+        <span class="ph" tabindex="0" data-k="6">Design starts only when both are done, and the designer must see the store model and carpet area.<sup>6</sup></span>
+        <span class="ph" tabindex="0" data-k="7">If the GFC budget is over ₹50 lakh, the CFO signs off before the admin.<sup>7</sup></span>
+      </div>
+
+      <div class="results">
+        <div class="res" data-k="1">
+          <span class="k">1</span>
+          <span class="what">Start form and who may start a case</span>
+<pre>"start": {
+  "roles":  ["bdExecutive", "bdSupervisor"],
+  "fields": [siteName·text, city·text, address·textarea]
+}</pre>
+          <span class="then">Compiles to a <b>start form</b>; Operaton records the starter as <code>initiator</code>.</span>
+        </div>
+        <div class="res" data-k="2">
+          <span class="k">2</span>
+          <span class="what">An approval with a skip rule</span>
+<pre>{ "id": "bd_review_draft", "role": "bdSupervisor",
+  "kind": "approval",
+  "outcomes": [shortlist, reject → "@close"],
+  "skip_if": { "initiator_in": "bdSupervisor" } }</pre>
+          <span class="then">Compiles to a <b>decision gateway</b> before the task and one after it.</span>
+        </div>
+        <div class="res" data-k="3">
+          <span class="k">3</span>
+          <span class="what">Maker, then checker with send-back</span>
+<pre>{ "id": "bd_site_details", "assignee": "initiator",
+  "fields": [carpetArea·number, monthlyRent·number, sitePhotos·file] }
+{ "id": "bd_approve_details", "kind": "approval",
+  "send_back": "bd_site_details" }</pre>
+          <span class="then">"The executive" means <b>the one who created this site</b>, so the task is assigned to them alone.</span>
+        </div>
+        <div class="res" data-k="4">
+          <span class="k">4</span>
+          <span class="what">Two modules with the same predecessor</span>
+<pre>legal   { "after": ["bd_loi"] }
+finance { "after": ["bd_loi"] }</pre>
+          <span class="then">Compiles to a <b>parallel split</b> after the LOI module.</span>
+        </div>
+        <div class="res" data-k="5">
+          <span class="k">5</span>
+          <span class="what">Picked from the catalogue, not invented</span>
+<pre>add_module(key="legal", from_catalogue="legal")
+  → DD checklist, verdict, change request,
+    agreement, licensing (preset)</pre>
+          <span class="then">"Its usual due diligence" matches the <b>Legal package</b>, including the change-request loop.</span>
+        </div>
+        <div class="res" data-k="6">
+          <span class="k">6</span>
+          <span class="what">A join, and data carried forward</span>
+<pre>design { "after": ["legal", "finance"] }
+design_allocate { "show": ["storeModel", "carpetArea"] }</pre>
+          <span class="then">Compiles to a <b>parallel join</b>; the form shows both values read-only from earlier modules.</span>
+        </div>
+        <div class="res warn" data-k="7">
+          <span class="k">7</span>
+          <span class="what">New step, rejected once, then fixed</span>
+<pre>{ "id": "cfo_signoff", "role": "cfo", "kind": "approval",
+  "send_back": "pe_fill", "skip_if": "gfcTotal &lt;= 5000000" }
+✗ role 'cfo' is not a group</pre>
+          <span class="then">No package has a CFO. The validator refuses, and <b>the agent asks you</b> who the CFO is before it continues.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="log-h">
+    <h2 id="log-h">What the agent actually sends</h2>
+    <p>These are real tools on the configurator today. The agent sees each result, including errors, and reacts to them.</p>
+    <div class="log">
+<pre><span class="fn">catalogue</span>()                                     <span class="c"># what packages exist</span>
+<span class="fn">add_module</span>(key="bd_qualification", from_catalogue="bd_qualification")
+<span class="fn">add_module</span>(key="bd_loi",  from_catalogue="bd_loi",  after=["bd_qualification"])
+<span class="fn">add_module</span>(key="legal",   from_catalogue="legal",   after=["bd_loi"])
+<span class="fn">add_module</span>(key="finance", from_catalogue="finance", after=["bd_loi"])
+<span class="fn">add_module</span>(key="design",  from_catalogue="design",  after=["legal", "finance"])
+<span class="fn">update_task</span>("design", "design_allocate", {"show": ["storeModel", "carpetArea"]})
+<span class="fn">add_task</span>("pe_budget", {"id": "cfo_signoff", "role": "cfo", ...}, before="pe_admin")
+  <span class="bad">✗ invalid configuration: pe_budget.cfo_signoff: role 'cfo' is not a group</span>
+  <span class="ask">→ agent to you: "Who signs off as CFO? I'll add them as a user."</span>
+<span class="fn">add_group</span>("cfo", "CFO")
+<span class="fn">add_user</span>("cfo1", "Rahul CFO", ["cfo"])
+<span class="fn">add_task</span>("pe_budget", {"id": "cfo_signoff", ...}, before="pe_admin")   <span class="ok">✓</span>
+<span class="fn">check</span>()      <span class="ok">OK: every task done by the right role, hidden from the others</span>
+<span class="ask">→ you review the preview and press Publish</span>
+<span class="fn">publish</span>()    <span class="ok">release v4 · 11 processes · 16 users synced</span></pre>
+    </div>
+  </section>
+
+  <section aria-labelledby="who-h">
+    <h2 id="who-h">Who produces what</h2>
+    <div class="cols">
+      <div class="col k-you">
+        <span class="chip c-you">You</span>
+        <h3>The intent</h3>
+        <span class="sub">Written once, in your own words.</span>
+        <ul>
+          <li>The order of work</li>
+          <li>Who does each step</li>
+          <li>Who approves, and what reject means</li>
+          <li>Answers when the agent asks</li>
+          <li>The final Publish</li>
+        </ul>
+      </div>
+      <div class="col k-llm">
+        <span class="chip c-llm">LLM agent</span>
+        <h3>A configuration diff</h3>
+        <span class="sub">Data only. Never XML, never code.</span>
+        <ul>
+          <li>Which packages to use</li>
+          <li>Module order: <code>after</code> lists</li>
+          <li>New tasks, fields, outcomes</li>
+          <li>Rules: <code>skip_if</code>, <code>route</code></li>
+          <li>Users and roles to add</li>
+          <li>Clarifying questions</li>
+        </ul>
+      </div>
+      <div class="col k-ours">
+        <span class="chip c-ours">Our platform</span>
+        <h3>Everything fixed, plus the compiler</h3>
+        <span class="file">catalogue.json · matrix.py · mcp_server.py</span>
+        <ul>
+          <li>Package catalogue (10 Matrix modules)</li>
+          <li>Task kinds and 8 field types</li>
+          <li>Validator</li>
+          <li>BPMN for each module and for the site</li>
+          <li>One HTML form per task</li>
+          <li>Groups, users, permissions, inbox views</li>
+          <li>End-to-end check, migration of running sites</li>
+        </ul>
+      </div>
+      <div class="col k-engine">
+        <span class="chip c-engine">Operaton</span>
+        <h3>The running application</h3>
+        <span class="sub">Unmodified, open source.</span>
+        <ul>
+          <li>Versioned releases in Postgres</li>
+          <li>A case per site, a token per active step</li>
+          <li>Routing, parallel joins, loops</li>
+          <li>Task inboxes, claim, complete</li>
+          <li>Login and permission checks</li>
+          <li>Files, history, audit trail</li>
+          <li>Tasklist, Cockpit, Admin screens</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rt-h">
+    <h2 id="rt-h">Then people use it</h2>
+    <p>From here the LLM is out of the loop. One click in Tasklist, traced through Operaton:</p>
+    <div class="runtime">
+      <div class="tick"><span class="t">Click</span><p>Meera (BD supervisor) opens <em>Approve site details</em>, picks Approve, presses Complete.</p></div>
+      <div class="tick"><span class="t">Check</span><p>Operaton confirms she holds <code>bdSupervisor</code> and that the task is hers or her team's.</p></div>
+      <div class="tick"><span class="t">Route</span><p>The gateway reads <code>bd_approve_details_outcome = approve</code>, ends the module and starts the LOI module.</p></div>
+      <div class="tick"><span class="t">Assign</span><p><em>Upload LOI</em> appears only in Riya's inbox, because she created the site. History records all of it.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="g-h">
+    <h2 id="g-h">Why letting an LLM do this is safe</h2>
+    <div class="rails">
+      <div class="rail"><h3>It can only pick from a menu</h3><p>Tools accept modules, tasks, fields and rules in a fixed shape. There is no tool for writing BPMN or code.</p></div>
+      <div class="rail"><h3>Bad configs are refused</h3><p>The validator runs on every change. Errors go back to the agent, which must fix them or ask you.</p></div>
+      <div class="rail"><h3>It is tested before you see it</h3><p>The check drives a case end to end as the real users and fails if any role can see or act on the wrong task.</p></div>
+      <div class="rail"><h3>You publish, not the agent</h3><p>Each publish is a new version. Sites already running stay on theirs until you choose to migrate them.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="b-h">
+    <h2 id="b-h">For the landing-page agent: built vs. still needed</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Piece</th><th>Status</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Package catalogue, validator, compiler</td><td><span class="st done">Built</span></td><td><code>catalogue.json</code>, <code>matrix.py</code></td></tr>
+          <tr><td>Configurator tools (19)</td><td><span class="st done">Built</span></td><td>MCP server, same ops as the CLI</td></tr>
+          <tr><td>Publish, end-to-end check, migrate running sites</td><td><span class="st done">Built</span></td><td>Verified on 61 tasks across 13 users</td></tr>
+          <tr><td>Chat box on a web page that runs the agent</td><td><span class="st todo">Needed</span></td><td>Claude API with tool use, calling the same functions</td></tr>
+          <tr><td>Live preview of the flow while you chat</td><td><span class="st todo">Needed</span></td><td>Render the compiled BPMN with bpmn-js, plus a per-role task list</td></tr>
+          <tr><td>Structured conditions instead of expressions</td><td><span class="st todo">Needed</span></td><td>The agent writes <code>{"&gt;": ["gfcTotal", 5000000]}</code>; the compiler turns it into JUEL</td></tr>
+          <tr><td>Approve-then-publish step and version diff</td><td><span class="st todo">Needed</span></td><td>Show what changed since the live version before Publish</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Prototype: <code>~/Desktop/operaton/matrix-bd-workflow</code> · Operaton 2.1.5 on local Postgres · design follows the Matrix Platform Refoundation (Flow Graph compiled to BPMN).</footer>
+</main>
+
+<script>
+(function () {
+  var phrases = document.querySelectorAll('.ph');
+  var results = document.querySelectorAll('.res');
+  function select(k, scroll) {
+    phrases.forEach(function (p) { p.classList.toggle('on', p.dataset.k === k); });
+    results.forEach(function (r) {
+      var on = r.dataset.k === k;
+      r.classList.toggle('on', on);
+      if (on && scroll && window.matchMedia('(max-width: 860px)').matches) { r.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    });
+  }
+  phrases.forEach(function (p) {
+    p.addEventListener('click', function () { select(p.dataset.k, true); });
+    p.addEventListener('mouseenter', function () { select(p.dataset.k, false); });
+    p.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(p.dataset.k, true); } });
+  });
+  results.forEach(function (r) { r.addEventListener('mouseenter', function () { select(r.dataset.k, false); }); });
+  select('2', false);
+})();
+</script>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__pe_budget" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__pe_budget" name="Project Excellence - GFC budget" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="pe_delegate" name="Assign budget owner" operaton:formKey="embedded:deployment:forms/pe_delegate.html" operaton:candidateGroups="peSupervisor"></bpmn:userTask>
+<bpmn:userTask id="pe_fill" name="Fill GFC budget (11 heads)" operaton:formKey="embedded:deployment:forms/pe_fill.html" operaton:assignee="${peExec}"></bpmn:userTask>
+<bpmn:userTask id="pe_review" name="Review GFC budget" operaton:formKey="embedded:deployment:forms/pe_review.html" operaton:candidateGroups="peSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="pe_review_gw" />
+<bpmn:userTask id="pe_admin" name="Approve GFC budget" operaton:formKey="embedded:deployment:forms/pe_admin.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="pe_admin_gw" />
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="pe_delegate" />
+<bpmn:sequenceFlow id="f2" sourceRef="pe_delegate" targetRef="pe_fill" />
+<bpmn:sequenceFlow id="f3" sourceRef="pe_fill" targetRef="pe_review" />
+<bpmn:sequenceFlow id="f4" sourceRef="pe_review" targetRef="pe_review_gw" />
+<bpmn:sequenceFlow id="f5" sourceRef="pe_review_gw" targetRef="pe_admin" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${pe_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="pe_review_gw" targetRef="pe_fill" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${pe_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f7" sourceRef="pe_admin" targetRef="pe_admin_gw" />
+<bpmn:sequenceFlow id="f8" sourceRef="pe_admin_gw" targetRef="done" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${pe_admin_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f9" sourceRef="pe_admin_gw" targetRef="pe_fill" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${pe_admin_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__pe_budget"><bpmndi:BPMNPlane id="plane_matrix_site__pe_budget" bpmnElement="matrix_site__pe_budget">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1257" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pe_delegate_di" bpmnElement="pe_delegate"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pe_fill_di" bpmnElement="pe_fill"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pe_review_di" bpmnElement="pe_review"><dc:Bounds x="560" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pe_review_gw_di" bpmnElement="pe_review_gw"><dc:Bounds x="755" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pe_admin_di" bpmnElement="pe_admin"><dc:Bounds x="890" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pe_admin_gw_di" bpmnElement="pe_admin_gw"><dc:Bounds x="1085" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="560" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="670" y="120" /><di:waypoint x="755" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="805" y="120" /><di:waypoint x="890" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="780" y="95" /><di:waypoint x="780" y="62" /><di:waypoint x="450" y="62" /><di:waypoint x="450" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="1000" y="120" /><di:waypoint x="1085" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="1135" y="120" /><di:waypoint x="1257" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1110" y="95" /><di:waypoint x="1110" y="54" /><di:waypoint x="450" y="54" /><di:waypoint x="450" y="80" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

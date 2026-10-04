@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__bd_loi" targetNamespace="https://matrix-bd/workflow">
+<bpmn:error id="Error_CLOSED" name="CLOSED" errorCode="CLOSED" />
+<bpmn:process id="matrix_site__bd_loi" name="BD - LOI" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="bd_upload_loi" name="Upload LOI" operaton:formKey="embedded:deployment:forms/bd_upload_loi.html" operaton:assignee="${initiator}"></bpmn:userTask>
+<bpmn:userTask id="bd_send_legal" name="Send to Legal and Finance" operaton:formKey="embedded:deployment:forms/bd_send_legal.html" operaton:candidateGroups="bdSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="bd_send_legal_gw" />
+<bpmn:endEvent id="bd_send_legal_reject_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:endEvent id="bd_send_legal_archive_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="bd_upload_loi" />
+<bpmn:sequenceFlow id="f2" sourceRef="bd_upload_loi" targetRef="bd_send_legal" />
+<bpmn:sequenceFlow id="f3" sourceRef="bd_send_legal" targetRef="bd_send_legal_gw" />
+<bpmn:sequenceFlow id="f4" sourceRef="bd_send_legal_gw" targetRef="done" name="Send to Legal + Finance"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_send_legal_outcome == 'send'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f5" sourceRef="bd_send_legal_gw" targetRef="bd_upload_loi" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_send_legal_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="bd_send_legal_gw" targetRef="bd_send_legal_reject_end" name="Reject"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_send_legal_outcome == 'reject'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f7" sourceRef="bd_send_legal_gw" targetRef="bd_send_legal_archive_end" name="Archive"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_send_legal_outcome == 'archive'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__bd_loi"><bpmndi:BPMNPlane id="plane_matrix_site__bd_loi" bpmnElement="matrix_site__bd_loi">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="762" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_upload_loi_di" bpmnElement="bd_upload_loi"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_send_legal_di" bpmnElement="bd_send_legal"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_send_legal_gw_di" bpmnElement="bd_send_legal_gw"><dc:Bounds x="590" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_send_legal_reject_end_di" bpmnElement="bd_send_legal_reject_end"><dc:Bounds x="762" y="242" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_send_legal_archive_end_di" bpmnElement="bd_send_legal_archive_end"><dc:Bounds x="762" y="382" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="590" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="640" y="120" /><di:waypoint x="762" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="615" y="95" /><di:waypoint x="615" y="62" /><di:waypoint x="285" y="62" /><di:waypoint x="285" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="260" /><di:waypoint x="762" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="400" /><di:waypoint x="762" y="400" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

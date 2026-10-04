@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__launch" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__launch" name="Launch validation" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="launch_send" name="Review details, send for review" operaton:formKey="embedded:deployment:forms/launch_send.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:userTask id="launch_exec_verdict" name="Executive verdict" operaton:formKey="embedded:deployment:forms/launch_exec_verdict.html" operaton:assignee="${initiator}"></bpmn:userTask>
+<bpmn:userTask id="launch_sup_verdict" name="Supervisor verdict and rent terms" operaton:formKey="embedded:deployment:forms/launch_sup_verdict.html" operaton:candidateGroups="bdSupervisor"></bpmn:userTask>
+<bpmn:userTask id="launch_confirm" name="Confirm launch terms" operaton:formKey="embedded:deployment:forms/launch_confirm.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:userTask id="launch_go" name="Launch site" operaton:formKey="embedded:deployment:forms/launch_go.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="launch_send" />
+<bpmn:sequenceFlow id="f2" sourceRef="launch_send" targetRef="launch_exec_verdict" />
+<bpmn:sequenceFlow id="f3" sourceRef="launch_exec_verdict" targetRef="launch_sup_verdict" />
+<bpmn:sequenceFlow id="f4" sourceRef="launch_sup_verdict" targetRef="launch_confirm" />
+<bpmn:sequenceFlow id="f5" sourceRef="launch_confirm" targetRef="launch_go" />
+<bpmn:sequenceFlow id="f6" sourceRef="launch_go" targetRef="done" />
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__launch"><bpmndi:BPMNPlane id="plane_matrix_site__launch" bpmnElement="matrix_site__launch">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1092" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="launch_send_di" bpmnElement="launch_send"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="launch_exec_verdict_di" bpmnElement="launch_exec_verdict"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="launch_sup_verdict_di" bpmnElement="launch_sup_verdict"><dc:Bounds x="560" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="launch_confirm_di" bpmnElement="launch_confirm"><dc:Bounds x="725" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="launch_go_di" bpmnElement="launch_go"><dc:Bounds x="890" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="560" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="670" y="120" /><di:waypoint x="725" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="835" y="120" /><di:waypoint x="890" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="1000" y="120" /><di:waypoint x="1092" y="120" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>
