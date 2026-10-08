@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__closure" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__closure" name="Financial closure" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="fc_send" name="Send for financial closure" operaton:formKey="embedded:deployment:forms/fc_send.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:userTask id="fc_actuals" name="Enter actuals vs GFC" operaton:formKey="embedded:deployment:forms/fc_actuals.html" operaton:assignee="${projectExec}"></bpmn:userTask>
+<bpmn:userTask id="fc_review" name="Review closure actuals" operaton:formKey="embedded:deployment:forms/fc_review.html" operaton:candidateGroups="projectSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="fc_review_gw" />
+<bpmn:userTask id="fc_admin" name="Approve financial closure" operaton:formKey="embedded:deployment:forms/fc_admin.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="fc_admin_gw" />
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="fc_send" />
+<bpmn:sequenceFlow id="f2" sourceRef="fc_send" targetRef="fc_actuals" />
+<bpmn:sequenceFlow id="f3" sourceRef="fc_actuals" targetRef="fc_review" />
+<bpmn:sequenceFlow id="f4" sourceRef="fc_review" targetRef="fc_review_gw" />
+<bpmn:sequenceFlow id="f5" sourceRef="fc_review_gw" targetRef="fc_admin" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fc_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="fc_review_gw" targetRef="fc_actuals" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fc_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f7" sourceRef="fc_admin" targetRef="fc_admin_gw" />
+<bpmn:sequenceFlow id="f8" sourceRef="fc_admin_gw" targetRef="done" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fc_admin_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f9" sourceRef="fc_admin_gw" targetRef="fc_actuals" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${fc_admin_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__closure"><bpmndi:BPMNPlane id="plane_matrix_site__closure" bpmnElement="matrix_site__closure">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1257" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fc_send_di" bpmnElement="fc_send"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fc_actuals_di" bpmnElement="fc_actuals"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fc_review_di" bpmnElement="fc_review"><dc:Bounds x="560" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fc_review_gw_di" bpmnElement="fc_review_gw"><dc:Bounds x="755" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fc_admin_di" bpmnElement="fc_admin"><dc:Bounds x="890" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fc_admin_gw_di" bpmnElement="fc_admin_gw"><dc:Bounds x="1085" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="560" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="670" y="120" /><di:waypoint x="755" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="805" y="120" /><di:waypoint x="890" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="780" y="95" /><di:waypoint x="780" y="62" /><di:waypoint x="450" y="62" /><di:waypoint x="450" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="1000" y="120" /><di:waypoint x="1085" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="1135" y="120" /><di:waypoint x="1257" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1110" y="95" /><di:waypoint x="1110" y="54" /><di:waypoint x="450" y="54" /><di:waypoint x="450" y="80" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

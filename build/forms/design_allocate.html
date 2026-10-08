@@ -1,0 +1,32 @@
+<form role="form">
+<div class="well well-sm" id="mx-show-design_allocate"><strong>Site data</strong><table class="table table-condensed" style="margin:6px 0 0"><tbody></tbody></table></div>
+<div class="form-group"><label class="control-label" for="designExec">Design executive</label><select class="form-control" cam-variable-name="designExec" name="designExec" id="designExec" cam-variable-type="String" required><option value=""></option><option value="designexec">Dev Design-Exec</option></select></div>
+<script cam-script type="text/form-script">
+(function () {
+  var SHOW = [["initiator", "Created by"], ["siteName", "Site name"], ["city", "City"], ["address", "Address"], ["storeModel", "Store model"], ["carpetArea", "Carpet area (sq ft)"], ["sitePhotos", "Site photos / deck"]], TID = 'design_allocate';
+  var api = window.location.pathname.split('/app/')[0] + '/api/engine/engine/default';
+  camForm.on('form-loaded', function () { SHOW.forEach(function (s) { camForm.variableManager.fetchVariable(s[0]); }); });
+  camForm.on('variables-fetched', function () {
+    var body = document.querySelector('#mx-show-' + TID + ' tbody');
+    if (!body) { return; }
+    body.innerHTML = '';
+    SHOW.forEach(function (s) {
+      var v = camForm.variableManager.variable(s[0]) || {}, td = document.createElement('td'), tr = document.createElement('tr');
+      if (v.type === 'File' || (v.valueInfo && v.valueInfo.filename)) {
+        var link = document.createElement('a');
+        link.href = api + '/task/' + camForm.taskId + '/variables/' + s[0] + '/data';
+        link.textContent = (v.valueInfo && v.valueInfo.filename) || 'download';
+        link.target = '_blank';
+        td.appendChild(link);
+      } else {
+        td.textContent = v.value === undefined || v.value === null || v.value === '' ? '-' : (v.value === true ? 'Yes' : v.value === false ? 'No' : String(v.value));
+      }
+      var th = document.createElement('th');
+      th.textContent = s[1];
+      th.style.width = '40%';
+      tr.appendChild(th); tr.appendChild(td); body.appendChild(tr);
+    });
+  });
+})();
+</script>
+</form>

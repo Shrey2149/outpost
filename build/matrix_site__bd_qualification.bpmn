@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__bd_qualification" targetNamespace="https://matrix-bd/workflow">
+<bpmn:error id="Error_CLOSED" name="CLOSED" errorCode="CLOSED" />
+<bpmn:process id="matrix_site__bd_qualification" name="BD - Site qualification" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:exclusiveGateway id="bd_review_draft_skip" name="Skip?" />
+<bpmn:userTask id="bd_review_draft" name="Review site draft" operaton:formKey="embedded:deployment:forms/bd_review_draft.html" operaton:candidateGroups="bdSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="bd_review_draft_gw" />
+<bpmn:endEvent id="bd_review_draft_reject_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:endEvent id="bd_review_draft_archive_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:userTask id="bd_site_details" name="Submit site details" operaton:formKey="embedded:deployment:forms/bd_site_details.html" operaton:assignee="${initiator}"></bpmn:userTask>
+<bpmn:userTask id="bd_approve_details" name="Approve site details" operaton:formKey="embedded:deployment:forms/bd_approve_details.html" operaton:candidateGroups="bdSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="bd_approve_details_gw" />
+<bpmn:endEvent id="bd_approve_details_reject_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:endEvent id="bd_approve_details_archive_end" name="Closed"><bpmn:errorEventDefinition errorRef="Error_CLOSED" /></bpmn:endEvent>
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="bd_review_draft_skip" />
+<bpmn:sequenceFlow id="f2" sourceRef="bd_review_draft_skip" targetRef="bd_review_draft"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!(execution.processEngineServices.identityService.createGroupQuery().groupMember(initiator).groupId('bdSupervisor').count() &gt; 0)}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f3" sourceRef="bd_review_draft_skip" targetRef="bd_site_details" name="Skip"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.processEngineServices.identityService.createGroupQuery().groupMember(initiator).groupId('bdSupervisor').count() &gt; 0}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f4" sourceRef="bd_review_draft" targetRef="bd_review_draft_gw" />
+<bpmn:sequenceFlow id="f5" sourceRef="bd_review_draft_gw" targetRef="bd_site_details" name="Shortlist"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_review_draft_outcome == 'shortlist'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="bd_review_draft_gw" targetRef="bd_review_draft_reject_end" name="Reject"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_review_draft_outcome == 'reject'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f7" sourceRef="bd_review_draft_gw" targetRef="bd_review_draft_archive_end" name="Archive"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_review_draft_outcome == 'archive'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f8" sourceRef="bd_site_details" targetRef="bd_approve_details" />
+<bpmn:sequenceFlow id="f9" sourceRef="bd_approve_details" targetRef="bd_approve_details_gw" />
+<bpmn:sequenceFlow id="f10" sourceRef="bd_approve_details_gw" targetRef="done" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_approve_details_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f11" sourceRef="bd_approve_details_gw" targetRef="bd_site_details" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_approve_details_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f12" sourceRef="bd_approve_details_gw" targetRef="bd_approve_details_reject_end" name="Reject"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_approve_details_outcome == 'reject'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f13" sourceRef="bd_approve_details_gw" targetRef="bd_approve_details_archive_end" name="Archive"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bd_approve_details_outcome == 'archive'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__bd_qualification"><bpmndi:BPMNPlane id="plane_matrix_site__bd_qualification" bpmnElement="matrix_site__bd_qualification">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1257" y="242" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_review_draft_skip_di" bpmnElement="bd_review_draft_skip"><dc:Bounds x="260" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_review_draft_di" bpmnElement="bd_review_draft"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_review_draft_gw_di" bpmnElement="bd_review_draft_gw"><dc:Bounds x="590" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_review_draft_reject_end_di" bpmnElement="bd_review_draft_reject_end"><dc:Bounds x="762" y="382" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_review_draft_archive_end_di" bpmnElement="bd_review_draft_archive_end"><dc:Bounds x="762" y="522" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_site_details_di" bpmnElement="bd_site_details"><dc:Bounds x="725" y="220" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_approve_details_di" bpmnElement="bd_approve_details"><dc:Bounds x="890" y="220" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_approve_details_gw_di" bpmnElement="bd_approve_details_gw"><dc:Bounds x="1085" y="235" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_approve_details_reject_end_di" bpmnElement="bd_approve_details_reject_end"><dc:Bounds x="1257" y="382" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bd_approve_details_archive_end_di" bpmnElement="bd_approve_details_archive_end"><dc:Bounds x="1257" y="522" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="260" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="310" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="285" y="145" /><di:waypoint x="285" y="260" /><di:waypoint x="725" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="505" y="120" /><di:waypoint x="590" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="260" /><di:waypoint x="725" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="400" /><di:waypoint x="762" y="400" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="615" y="145" /><di:waypoint x="615" y="540" /><di:waypoint x="762" y="540" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="835" y="260" /><di:waypoint x="890" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1000" y="260" /><di:waypoint x="1085" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f10_di" bpmnElement="f10"><di:waypoint x="1135" y="260" /><di:waypoint x="1257" y="260" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f11_di" bpmnElement="f11"><di:waypoint x="1110" y="235" /><di:waypoint x="1110" y="202" /><di:waypoint x="780" y="202" /><di:waypoint x="780" y="220" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f12_di" bpmnElement="f12"><di:waypoint x="1110" y="285" /><di:waypoint x="1110" y="400" /><di:waypoint x="1257" y="400" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f13_di" bpmnElement="f13"><di:waypoint x="1110" y="285" /><di:waypoint x="1110" y="540" /><di:waypoint x="1257" y="540" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

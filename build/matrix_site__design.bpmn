@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:operaton="http://operaton.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_matrix_site__design" targetNamespace="https://matrix-bd/workflow">
+<bpmn:process id="matrix_site__design" name="Design" isExecutable="true" operaton:historyTimeToLive="180" operaton:isStartableInTasklist="false">
+<bpmn:startEvent id="start" name="Start"></bpmn:startEvent>
+<bpmn:endEvent id="done" name="Done"></bpmn:endEvent>
+<bpmn:userTask id="design_allocate" name="Allocate design executive" operaton:formKey="embedded:deployment:forms/design_allocate.html" operaton:candidateGroups="designSupervisor"></bpmn:userTask>
+<bpmn:userTask id="design_recce" name="Upload recce" operaton:formKey="embedded:deployment:forms/design_recce.html" operaton:assignee="${designExec}"></bpmn:userTask>
+<bpmn:userTask id="design_recce_review" name="Review recce" operaton:formKey="embedded:deployment:forms/design_recce_review.html" operaton:candidateGroups="designSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_recce_review_gw" />
+<bpmn:userTask id="design_2d" name="Upload 2D layout" operaton:formKey="embedded:deployment:forms/design_2d.html" operaton:assignee="${designExec}"></bpmn:userTask>
+<bpmn:userTask id="design_2d_review" name="Review 2D" operaton:formKey="embedded:deployment:forms/design_2d_review.html" operaton:candidateGroups="designSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_2d_review_gw" />
+<bpmn:userTask id="design_2d_admin" name="Admin approve 2D" operaton:formKey="embedded:deployment:forms/design_2d_admin.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_2d_admin_gw" />
+<bpmn:userTask id="design_3d" name="Upload 3D" operaton:formKey="embedded:deployment:forms/design_3d.html" operaton:assignee="${designExec}"></bpmn:userTask>
+<bpmn:userTask id="design_3d_review" name="Review 3D" operaton:formKey="embedded:deployment:forms/design_3d_review.html" operaton:candidateGroups="designSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_3d_review_gw" />
+<bpmn:userTask id="design_gfc" name="GFC approval (Good For Construction)" operaton:formKey="embedded:deployment:forms/design_gfc.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_gfc_gw" />
+<bpmn:userTask id="design_boq" name="Upload BOQ and estimate" operaton:formKey="embedded:deployment:forms/design_boq.html" operaton:assignee="${designExec}"></bpmn:userTask>
+<bpmn:userTask id="design_boq_review" name="Review BOQ" operaton:formKey="embedded:deployment:forms/design_boq_review.html" operaton:candidateGroups="designSupervisor"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_boq_review_gw" />
+<bpmn:userTask id="design_final" name="Approve design completion" operaton:formKey="embedded:deployment:forms/design_final.html" operaton:candidateGroups="businessAdmin"></bpmn:userTask>
+<bpmn:exclusiveGateway id="design_final_gw" />
+<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="design_allocate" />
+<bpmn:sequenceFlow id="f2" sourceRef="design_allocate" targetRef="design_recce" />
+<bpmn:sequenceFlow id="f3" sourceRef="design_recce" targetRef="design_recce_review" />
+<bpmn:sequenceFlow id="f4" sourceRef="design_recce_review" targetRef="design_recce_review_gw" />
+<bpmn:sequenceFlow id="f5" sourceRef="design_recce_review_gw" targetRef="design_2d" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_recce_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f6" sourceRef="design_recce_review_gw" targetRef="design_recce" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_recce_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f7" sourceRef="design_2d" targetRef="design_2d_review" />
+<bpmn:sequenceFlow id="f8" sourceRef="design_2d_review" targetRef="design_2d_review_gw" />
+<bpmn:sequenceFlow id="f9" sourceRef="design_2d_review_gw" targetRef="design_2d_admin" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_2d_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f10" sourceRef="design_2d_review_gw" targetRef="design_2d" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_2d_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f11" sourceRef="design_2d_admin" targetRef="design_2d_admin_gw" />
+<bpmn:sequenceFlow id="f12" sourceRef="design_2d_admin_gw" targetRef="design_3d" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_2d_admin_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f13" sourceRef="design_2d_admin_gw" targetRef="design_2d" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_2d_admin_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f14" sourceRef="design_3d" targetRef="design_3d_review" />
+<bpmn:sequenceFlow id="f15" sourceRef="design_3d_review" targetRef="design_3d_review_gw" />
+<bpmn:sequenceFlow id="f16" sourceRef="design_3d_review_gw" targetRef="design_gfc" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_3d_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f17" sourceRef="design_3d_review_gw" targetRef="design_3d" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_3d_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f18" sourceRef="design_gfc" targetRef="design_gfc_gw" />
+<bpmn:sequenceFlow id="f19" sourceRef="design_gfc_gw" targetRef="design_boq" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_gfc_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f20" sourceRef="design_gfc_gw" targetRef="design_3d" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_gfc_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f21" sourceRef="design_boq" targetRef="design_boq_review" />
+<bpmn:sequenceFlow id="f22" sourceRef="design_boq_review" targetRef="design_boq_review_gw" />
+<bpmn:sequenceFlow id="f23" sourceRef="design_boq_review_gw" targetRef="design_final" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_boq_review_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f24" sourceRef="design_boq_review_gw" targetRef="design_boq" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_boq_review_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f25" sourceRef="design_final" targetRef="design_final_gw" />
+<bpmn:sequenceFlow id="f26" sourceRef="design_final_gw" targetRef="done" name="Approve"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_final_outcome == 'approve'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="f27" sourceRef="design_final_gw" targetRef="design_boq" name="Send back"><bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${design_final_outcome == 'send_back'}</bpmn:conditionExpression></bpmn:sequenceFlow>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="dia_matrix_site__design"><bpmndi:BPMNPlane id="plane_matrix_site__design" bpmnElement="matrix_site__design">
+<bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="102" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="3402" y="102" width="36" height="36" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_allocate_di" bpmnElement="design_allocate"><dc:Bounds x="230" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_recce_di" bpmnElement="design_recce"><dc:Bounds x="395" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_recce_review_di" bpmnElement="design_recce_review"><dc:Bounds x="560" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_recce_review_gw_di" bpmnElement="design_recce_review_gw"><dc:Bounds x="755" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_2d_di" bpmnElement="design_2d"><dc:Bounds x="890" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_2d_review_di" bpmnElement="design_2d_review"><dc:Bounds x="1055" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_2d_review_gw_di" bpmnElement="design_2d_review_gw"><dc:Bounds x="1250" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_2d_admin_di" bpmnElement="design_2d_admin"><dc:Bounds x="1385" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_2d_admin_gw_di" bpmnElement="design_2d_admin_gw"><dc:Bounds x="1580" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_3d_di" bpmnElement="design_3d"><dc:Bounds x="1715" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_3d_review_di" bpmnElement="design_3d_review"><dc:Bounds x="1880" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_3d_review_gw_di" bpmnElement="design_3d_review_gw"><dc:Bounds x="2075" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_gfc_di" bpmnElement="design_gfc"><dc:Bounds x="2210" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_gfc_gw_di" bpmnElement="design_gfc_gw"><dc:Bounds x="2405" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_boq_di" bpmnElement="design_boq"><dc:Bounds x="2540" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_boq_review_di" bpmnElement="design_boq_review"><dc:Bounds x="2705" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_boq_review_gw_di" bpmnElement="design_boq_review_gw"><dc:Bounds x="2900" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_final_di" bpmnElement="design_final"><dc:Bounds x="3035" y="80" width="110" height="80" /></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="design_final_gw_di" bpmnElement="design_final_gw"><dc:Bounds x="3230" y="95" width="50" height="50" /></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="138" y="120" /><di:waypoint x="230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="340" y="120" /><di:waypoint x="395" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="120" /><di:waypoint x="560" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="670" y="120" /><di:waypoint x="755" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="805" y="120" /><di:waypoint x="890" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="780" y="95" /><di:waypoint x="780" y="62" /><di:waypoint x="450" y="62" /><di:waypoint x="450" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="1000" y="120" /><di:waypoint x="1055" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="1165" y="120" /><di:waypoint x="1250" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1300" y="120" /><di:waypoint x="1385" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f10_di" bpmnElement="f10"><di:waypoint x="1275" y="95" /><di:waypoint x="1275" y="54" /><di:waypoint x="945" y="54" /><di:waypoint x="945" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f11_di" bpmnElement="f11"><di:waypoint x="1495" y="120" /><di:waypoint x="1580" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f12_di" bpmnElement="f12"><di:waypoint x="1630" y="120" /><di:waypoint x="1715" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f13_di" bpmnElement="f13"><di:waypoint x="1605" y="95" /><di:waypoint x="1605" y="46" /><di:waypoint x="945" y="46" /><di:waypoint x="945" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f14_di" bpmnElement="f14"><di:waypoint x="1825" y="120" /><di:waypoint x="1880" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f15_di" bpmnElement="f15"><di:waypoint x="1990" y="120" /><di:waypoint x="2075" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f16_di" bpmnElement="f16"><di:waypoint x="2125" y="120" /><di:waypoint x="2210" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f17_di" bpmnElement="f17"><di:waypoint x="2100" y="95" /><di:waypoint x="2100" y="38" /><di:waypoint x="1770" y="38" /><di:waypoint x="1770" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f18_di" bpmnElement="f18"><di:waypoint x="2320" y="120" /><di:waypoint x="2405" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f19_di" bpmnElement="f19"><di:waypoint x="2455" y="120" /><di:waypoint x="2540" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f20_di" bpmnElement="f20"><di:waypoint x="2430" y="95" /><di:waypoint x="2430" y="62" /><di:waypoint x="1770" y="62" /><di:waypoint x="1770" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f21_di" bpmnElement="f21"><di:waypoint x="2650" y="120" /><di:waypoint x="2705" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f22_di" bpmnElement="f22"><di:waypoint x="2815" y="120" /><di:waypoint x="2900" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f23_di" bpmnElement="f23"><di:waypoint x="2950" y="120" /><di:waypoint x="3035" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f24_di" bpmnElement="f24"><di:waypoint x="2925" y="95" /><di:waypoint x="2925" y="54" /><di:waypoint x="2595" y="54" /><di:waypoint x="2595" y="80" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f25_di" bpmnElement="f25"><di:waypoint x="3145" y="120" /><di:waypoint x="3230" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f26_di" bpmnElement="f26"><di:waypoint x="3280" y="120" /><di:waypoint x="3402" y="120" /></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f27_di" bpmnElement="f27"><di:waypoint x="3255" y="95" /><di:waypoint x="3255" y="46" /><di:waypoint x="2595" y="46" /><di:waypoint x="2595" y="80" /></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

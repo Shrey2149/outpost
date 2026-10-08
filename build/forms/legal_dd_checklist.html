@@ -1,0 +1,39 @@
+<form role="form">
+<div class="well well-sm" id="mx-show-legal_dd_checklist"><strong>Site data</strong><table class="table table-condensed" style="margin:6px 0 0"><tbody></tbody></table></div>
+<div class="checkbox"><label><input type="checkbox" cam-variable-name="ddTitleDoc" name="ddTitleDoc" id="ddTitleDoc" cam-variable-type="Boolean"> Title document clear</label></div>
+<div class="checkbox"><label><input type="checkbox" cam-variable-name="ddSanctionedPlan" name="ddSanctionedPlan" id="ddSanctionedPlan" cam-variable-type="Boolean"> Sanctioned plan</label></div>
+<div class="checkbox"><label><input type="checkbox" cam-variable-name="ddOcCc" name="ddOcCc" id="ddOcCc" cam-variable-type="Boolean"> OC / CC</label></div>
+<div class="checkbox"><label><input type="checkbox" cam-variable-name="ddCommercialUse" name="ddCommercialUse" id="ddCommercialUse" cam-variable-type="Boolean"> Commercial use permitted</label></div>
+<div class="checkbox"><label><input type="checkbox" cam-variable-name="ddPropertyTax" name="ddPropertyTax" id="ddPropertyTax" cam-variable-type="Boolean"> Property tax paid</label></div>
+<div class="checkbox"><label><input type="checkbox" cam-variable-name="ddElectricity" name="ddElectricity" id="ddElectricity" cam-variable-type="Boolean"> Electricity load OK</label></div>
+<div class="form-group"><label class="control-label" for="ddReport">DD report</label><input type="file" class="form-control" cam-variable-name="ddReport" name="ddReport" id="ddReport" cam-variable-type="File" cam-max-filesize="10000000"></div>
+<div class="form-group"><label class="control-label" for="ddNotes">Notes</label><textarea class="form-control" rows="3" cam-variable-name="ddNotes" name="ddNotes" id="ddNotes" cam-variable-type="String"></textarea></div>
+<script cam-script type="text/form-script">
+(function () {
+  var SHOW = [["initiator", "Created by"], ["siteName", "Site name"], ["city", "City"], ["address", "Address"], ["loiFile", "Signed LOI"]], TID = 'legal_dd_checklist';
+  var api = window.location.pathname.split('/app/')[0] + '/api/engine/engine/default';
+  camForm.on('form-loaded', function () { SHOW.forEach(function (s) { camForm.variableManager.fetchVariable(s[0]); }); });
+  camForm.on('variables-fetched', function () {
+    var body = document.querySelector('#mx-show-' + TID + ' tbody');
+    if (!body) { return; }
+    body.innerHTML = '';
+    SHOW.forEach(function (s) {
+      var v = camForm.variableManager.variable(s[0]) || {}, td = document.createElement('td'), tr = document.createElement('tr');
+      if (v.type === 'File' || (v.valueInfo && v.valueInfo.filename)) {
+        var link = document.createElement('a');
+        link.href = api + '/task/' + camForm.taskId + '/variables/' + s[0] + '/data';
+        link.textContent = (v.valueInfo && v.valueInfo.filename) || 'download';
+        link.target = '_blank';
+        td.appendChild(link);
+      } else {
+        td.textContent = v.value === undefined || v.value === null || v.value === '' ? '-' : (v.value === true ? 'Yes' : v.value === false ? 'No' : String(v.value));
+      }
+      var th = document.createElement('th');
+      th.textContent = s[1];
+      th.style.width = '40%';
+      tr.appendChild(th); tr.appendChild(td); body.appendChild(tr);
+    });
+  });
+})();
+</script>
+</form>
